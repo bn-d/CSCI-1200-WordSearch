@@ -39,37 +39,47 @@ public:
     // Check each word
     for (unsigned int indx = 0; indx < no_words.size(); indx++) {
       // Check the current word
-      int row_lim = this->numRows() - no_words[indx].size();
-      int col_lim = this->numColumns() - no_words[indx].size();
-      // Check horizontally
-      for (unsigned int i = 0; i < this->numRows(); i++) {
-        for (int j = 0; j <= col_lim; j++) {
-          if (this->checkWord(i, j, no_words[indx], '4'))
-            return false;
-          if (this->checkWord(i, j, no_words[indx], '6'))
-            return false;
+      // Do not rotate if it is a letter
+      if (no_words[indx].size() == 1) {
+        for (unsigned int i = 0; i < this->numRows(); i++) {
+          for (unsigned int j = 0; j < this->numColumns(); j++)
+            if (this->checkWord(i, j, no_words[indx], '4'))
+              return false;
         }
       }
-      // Check vertically
-      for (int i = 0; i <= row_lim; i++) {
-        for (unsigned int j = 0; j < this->numColumns(); j++) {
-          if (this->checkWord(i, j, no_words[indx], '8'))
-            return false;
-          if (this->checkWord(i, j, no_words[indx], '2'))
-            return false;
+      else {
+        int row_lim = this->numRows() - no_words[indx].size();
+        int col_lim = this->numColumns() - no_words[indx].size();
+        // Check horizontally
+        for (unsigned int i = 0; i < this->numRows(); i++) {
+          for (int j = 0; j <= col_lim; j++) {
+            if (this->checkWord(i, j, no_words[indx], '4'))
+              return false;
+            if (this->checkWord(i, j, no_words[indx], '6'))
+              return false;
+          }
         }
-      }
-      // Check diagonally
-      for (int i = 0; i <= row_lim; i++) {
-        for (int j = 0; j <= col_lim; j++) {
-          if (this->checkWord(i, j, no_words[indx], '7'))
-            return false;
-          if (this->checkWord(i, j, no_words[indx], '3'))
-            return false;
-          if (this->checkWord(i, j, no_words[indx], '1'))
-            return false;
-          if (this->checkWord(i, j, no_words[indx], '9'))
-            return false;
+        // Check vertically
+        for (int i = 0; i <= row_lim; i++) {
+          for (unsigned int j = 0; j < this->numColumns(); j++) {
+            if (this->checkWord(i, j, no_words[indx], '8'))
+              return false;
+            if (this->checkWord(i, j, no_words[indx], '2'))
+              return false;
+          }
+        }
+        // Check diagonally
+        for (int i = 0; i <= row_lim; i++) {
+          for (int j = 0; j <= col_lim; j++) {
+            if (this->checkWord(i, j, no_words[indx], '7'))
+              return false;
+            if (this->checkWord(i, j, no_words[indx], '3'))
+              return false;
+            if (this->checkWord(i, j, no_words[indx], '1'))
+              return false;
+            if (this->checkWord(i, j, no_words[indx], '9'))
+              return false;
+          }
         }
       }
     }
@@ -100,8 +110,25 @@ public:
     return true;
   }
 
+  bool checkAvailable(int r, int c, string w, char dirc) {
+    /*
+      Check whether the move is legal
+    */
+
+    // Prepare word and direction
+    int dx = 0; int dy = 0;
+    getDxDy(dirc, dx, dy, r, w);
+
+    // Check whether the move rewrite existing slots
+    for (unsigned int i = 0; i < w.size(); i++) {
+      if (w[i] != board[r+i*dy][c+i*dx] && board[r+i*dy][c+i*dx] != '*')
+        return false;
+    }
+    return true;
+  }
+
   // Modifiers
-  bool setWord(int r, int c, string w, char dirc) {
+  void setWord(int r, int c, string w, char dirc) {
     /*
       Check whether the word can be placed at given location with given roatation.
       Place the word and return true if the move is legal. Retrun false otherwise.
@@ -110,12 +137,6 @@ public:
     // Prepare word and direction
     int dx = 0; int dy = 0;
     getDxDy(dirc, dx, dy, r, w);
-
-    // Check whether the move is legal
-    for (unsigned int i = 0; i < w.size(); i++) {
-      if (w[i] != board[r+i*dy][c+i*dx] && board[r+i*dy][c+i*dx] != '*')
-        return false;
-    }
 
     // Set word to the board
     int empty_fill = 0;
@@ -127,8 +148,6 @@ public:
       }
     }
     empty -= empty_fill;
-
-    return true;
   }
 
   void fill_empty(char c) {
