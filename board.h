@@ -14,7 +14,6 @@ public:
   // Constructor
   Board(unsigned int r, unsigned int c) {
     board = vector<vector<char> >(r, vector<char>(c, '*'));
-    dup = vector<vector<int> >(r, vector<int>(c, 0));
     empty = r * c;
 
   }
@@ -121,37 +120,15 @@ public:
     // Set word to the board
     int empty_fill = 0;
     for (unsigned int i = 0; i < w.size(); i++) {
-      board[r+i*dy][c+i*dx] = w[i];
       // Count the number of empty slots that get filled
-      if (dup[r+i*dy][c+i*dx] == 0)
+      if (board[r+i*dy][c+i*dx] == '*') {
         empty_fill++;
-      dup[r+i*dy][c+i*dx] += 1;
+        board[r+i*dy][c+i*dx] = w[i];
+      }
     }
     empty -= empty_fill;
 
     return true;
-  }
-
-  void delWord(int r, int c, string w, char dirc) {
-    /*
-      Delete word at given location with given roatation
-    */
-
-    // Prepare word and direction
-    int dx = 0; int dy = 0;
-    getDxDy(dirc, dx, dy, r, w);
-
-    // Delete word from the board
-    int empty_add = 0;
-    for (unsigned int i = 0; i < w.size(); i++) {
-      // Count the number of slots that get emptied
-      dup[r+i*dy][c+i*dx] -= 1;
-      if (dup[r+i*dy][c+i*dx] == 0) {
-        board[r+i*dy][c+i*dx] = '*';
-        empty_add++;
-      }
-    }
-    empty += empty_add;
   }
 
   // toString
@@ -176,7 +153,6 @@ public:
 
 private:
   vector<vector<char> > board;
-  vector<vector<int> > dup;
   int empty;
 
   void getDxDy(char dirc, int &dx, int &dy, int &r, string &w) const {

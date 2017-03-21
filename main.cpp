@@ -124,9 +124,9 @@ int main(int argc, char *argv[]) {
     cout << "No solution" << endl;
   else
     cout << ans_set.size() << " solution(s)" << endl;
-# if 0
-  for (unsigned int i = 0; i < ans.size(); i++) {
-    ans[i].toString();
+# if 1
+  for (set<string>::iterator it=ans_set.begin(); it != ans_set.end(); it++) {
+    cout << *it;
   }
 #endif
 #endif
