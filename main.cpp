@@ -17,6 +17,8 @@ void wordSearch(Board b, vector<Board> &ans, const vector<string> &words,
 void word_recur(Board b, vector<Board> &ans, const vector<string> &words,
                 const vector<string> &no_words, const bool &all_solutions, int r,
                 int c, char dirc, unsigned int indx);
+void word_empty_fill(Board b, vector<Board> &ans, const vector<string> &no_words,
+                    char fill_char);
 
 // ==========================================================================
 // Output the coreect usage
@@ -97,16 +99,6 @@ int main(int argc, char *argv[]) {
 	Board b = Board(row, col);
   vector<Board> ans = vector<Board>();
 
-#if 0
-  b.setWord(0, 0, "dira", '4');
-  b.setWord(1, 0, "arts", '4');
-
-  b.Print();
-  cout << b.checkWord(0, 2, "at", '9') << endl;
-
-#endif
-
-#if 1
   // Start recursion
   wordSearch(b, ans, words, no_words, all_solutions);
 
@@ -124,11 +116,10 @@ int main(int argc, char *argv[]) {
     cout << "No solution" << endl;
   else
     cout << ans_set.size() << " solution(s)" << endl;
-# if 1
+# if 0
   for (set<string>::iterator it=ans_set.begin(); it != ans_set.end(); it++) {
     cout << *it;
   }
-#endif
 #endif
 
 	return 0;
@@ -136,6 +127,10 @@ int main(int argc, char *argv[]) {
 
 void wordSearch(Board b, vector<Board> &ans, const vector<string> &words,
                 const vector<string> &no_words, const bool &all_solutions) {
+  /*
+    Prepare for first layer of recursion
+  */
+
   // Place the first word at upper left corner
   int row_lim = (b.numRows() - words[0].size()) / 2;
   int col_lim = (b.numColumns() - words[0].size()) / 2;
@@ -167,19 +162,30 @@ void wordSearch(Board b, vector<Board> &ans, const vector<string> &words,
 void word_recur(Board b, vector<Board> &ans, const vector<string> &words,
                 const vector<string> &no_words, const bool &all_solutions, int r,
                 int c, char dirc, unsigned int indx) {
+  /*
+    Add word to board recursively
+  */
+
   // If the word can be added
   if (b.setWord(r, c, words[indx], dirc) && b.checkNoWord(no_words)) {
     indx++;
+    // If added all words
     if (indx == words.size()) {
+      // Add finished board to answer list for all solution
       if (b.checkFilled()) {
-        // Stop searching after one solution
+        // Stop searching after one solution if not all solutions
         if (!all_solutions) {
           cout << b.toString();
           exit(0);
         }
-        // Add to answer list for all solution
         ans.push_back(b);
       }
+      // Fill unfilled board
+      else {
+        for (char c = 'a'; c <= 'z'; c++)
+          word_empty_fill(b, ans, no_words, c);
+      }
+
       return;
     }
 
@@ -208,6 +214,25 @@ void word_recur(Board b, vector<Board> &ans, const vector<string> &words,
         word_recur(b, ans, words, no_words, all_solutions, i, j, '1', indx);
         word_recur(b, ans, words, no_words, all_solutions, i, j, '9', indx);
       }
+    }
+  }
+}
+
+void word_empty_fill(Board b, vector<Board> &ans, const vector<string> &no_words,
+                      char fill_char) {
+  /*
+    Fill the left empty slot recursively
+  */
+
+  // Fill a slots
+  b.fill_empty(fill_char);
+
+  if (b.checkNoWord(no_words)) {
+    if (b.checkFilled())
+      ans.push_back(b);
+    else {
+      for (char c = 'a'; c <= 'z'; c++)
+        word_empty_fill(b, ans, no_words, c);
     }
   }
 }

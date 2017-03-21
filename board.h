@@ -131,6 +131,18 @@ public:
     return true;
   }
 
+  void fill_empty(char c) {
+    for (unsigned int i = 0; i < this->numRows(); i++) {
+      for (unsigned int j = 0; j < this->numColumns(); j++) {
+        if (board[i][j] == '*') {
+          board[i][j] = c;
+          empty -= 1;
+          return;
+        }
+      }
+    }
+  }
+
   // toString
   string toString(bool hori_filp=false, bool vert_flip=false) const {
     string ans = "";
