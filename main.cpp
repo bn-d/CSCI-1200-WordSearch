@@ -1,12 +1,21 @@
-#include <iostream>
-#include <fstream>
-#include <iomanip>
+#include <cassert>
 #include <cstdlib>
+#include <fstream>
+#include <iostream>
+#include <math.h>
 #include <string>
 #include <vector>
-#include <cassert>
+
+#include "board.h"
 
 using namespace std;
+
+// Declaration
+void wordSearch(Board b, vector<Board> &ans, const vector<string> &words,
+                const vector<string> &no_words, const bool &all_solutions);
+void word_recur(Board b, vector<Board> &ans, const vector<string> &words,
+                const vector<string> &no_words, const bool &all_solutions, int r,
+                int c, char dirc, unsigned int indx);
 
 // ==========================================================================
 // Output the coreect usage
@@ -43,8 +52,8 @@ void HandleCommandLineArguments(int argc, char *argv[], string &infile, string &
 }
 
 // ==========================================================================
-void ParseInputFile(const string &filename, int &row,
-										int &col, vector<string> &words, vector<string> &no_words) {
+void ParseInputFile(const string &filename, unsigned int &col,
+										unsigned int &row, vector<string> &words, vector<string> &no_words) {
   // Open the input file
   ifstream istr(filename.c_str());
   if (!istr) {
@@ -55,7 +64,7 @@ void ParseInputFile(const string &filename, int &row,
 
   // Read each line of the input file
   string token, word;
-	istr >> row >> col;
+	istr >> col >> row;
 	// row = int(token);
 	// col = int(word);
   while (istr >> token >> word) {
@@ -74,18 +83,104 @@ void ParseInputFile(const string &filename, int &row,
 int main(int argc, char *argv[]) {
 	//==========Initialize variables
 	string infile, outfile;
-	int row = -1;
-	int col = -1;
+	unsigned int row = 0;
+	unsigned int col = 0;
 	bool all_solutions = false;
 	vector<string> words, no_words;
 
 	//==========Handle command line arguments and read file
 	HandleCommandLineArguments(argc, argv, infile, outfile, all_solutions);
-	ParseInputFile(infile, row, col, words, no_words);
+	ParseInputFile(infile, col, row, words, no_words);
 
-	cout << row << " " << col << endl;
-	for (unsigned int i = 0; i < words.size(); i++)
-		cout << words[i] << endl;
+  // Creat Board
+	Board b = Board(row, col);
+  vector<Board> ans = vector<Board>();
+
+  // Start recursion
+  wordSearch(b, ans, words, no_words, all_solutions);
+
+  // Print solution(s)
+  if (ans.size() == 0)
+    cout << "No solution" << endl;
+  else
+    cout << ans.size() << " solution(s)" << endl;
+  for (unsigned int i = 0; i < ans.size(); i++) {
+    ans[i].Print();
+  }
 
 	return 0;
+}
+
+void wordSearch(Board b, vector<Board> &ans, const vector<string> &words,
+                const vector<string> &no_words, const bool &all_solutions) {
+  // Place the first word
+  int row_lim = b.numRows() - words[0].size();
+  int col_lim = b.numColumns() - words[0].size();
+  // Place horizontally
+  for (unsigned int i = 0; i < b.numRows(); i++) {
+    for (int j = 0; j <= col_lim; j++) {
+      word_recur(b, ans, words, no_words, all_solutions, i, j, '4', 0);
+      word_recur(b, ans, words, no_words, all_solutions, i, j, '6', 0);
+    }
+  }
+  // Place vertically
+  for (int i = 0; i <= row_lim; i++) {
+    for (unsigned int j = 0; j < b.numColumns(); j++) {
+      word_recur(b, ans, words, no_words, all_solutions, i, j, '8', 0);
+      word_recur(b, ans, words, no_words, all_solutions, i, j, '2', 0);
+    }
+  }
+  // Place diagonally
+  for (int i = 0; i <= row_lim; i++) {
+    for (int j = 0; j <= col_lim; j++) {
+      word_recur(b, ans, words, no_words, all_solutions, i, j, '7', 0);
+      word_recur(b, ans, words, no_words, all_solutions, i, j, '3', 0);
+    }
+  }
+}
+
+void word_recur(Board b, vector<Board> &ans, const vector<string> &words,
+                const vector<string> &no_words, const bool &all_solutions, int r,
+                int c, char dirc, unsigned int indx) {
+  // If the word can be added
+  if (b.setWord(r, c, words[indx], dirc) && b.checkNoWord(no_words)) {
+    indx++;
+    if (indx == words.size()) {
+      if (b.checkFilled()) {
+        // Stop searching after one solution
+        if (!all_solutions) {
+          b.Print();
+          exit(0);
+        }
+        // Add to answer list for all solution
+        ans.push_back(b);
+      }
+      return;
+    }
+
+    // Place the current word
+    int row_lim = b.numRows() - words[indx].size();
+    int col_lim = b.numColumns() - words[indx].size();
+    // Place horizontally
+    for (unsigned int i = 0; i < b.numRows(); i++) {
+      for (int j = 0; j <= col_lim; j++) {
+        word_recur(b, ans, words, no_words, all_solutions, i, j, '4', indx);
+        word_recur(b, ans, words, no_words, all_solutions, i, j, '6', indx);
+      }
+    }
+    // Place vertically
+    for (int i = 0; i <= row_lim; i++) {
+      for (unsigned int j = 0; j < b.numColumns(); j++) {
+        word_recur(b, ans, words, no_words, all_solutions, i, j, '8', indx);
+        word_recur(b, ans, words, no_words, all_solutions, i, j, '2', indx);
+      }
+    }
+    // Place diagonally
+    for (int i = 0; i <= row_lim; i++) {
+      for (int j = 0; j <= col_lim; j++) {
+        word_recur(b, ans, words, no_words, all_solutions, i, j, '7', indx);
+        word_recur(b, ans, words, no_words, all_solutions, i, j, '3', indx);
+      }
+    }
+  }
 }
