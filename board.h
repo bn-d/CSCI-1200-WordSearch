@@ -34,7 +34,7 @@ public:
 
   bool checkNoWord(const vector<string> &no_words) const {
     /*
-    Return true if there no noWord. Return false otherwise
+      Return true if there no noWord. Return false otherwise
     */
 
     // Check each word
@@ -67,6 +67,10 @@ public:
             return false;
           if (this->checkWord(i, j, no_words[indx], '3'))
             return false;
+          if (this->checkWord(i, j, no_words[indx], '1'))
+            return false;
+          if (this->checkWord(i, j, no_words[indx], '9'))
+            return false;
         }
       }
     }
@@ -75,29 +79,19 @@ public:
 
   bool checkFilled() const {
     /*
-    Check whether the board is completely filled
+      Check whether the board is completely filled
     */
     return empty == 0;
   }
 
   bool checkWord(int r, int c, string w, char dirc) const {
     /*
-    Check whether a word is at given location with given roatation
-
-    dirc: '4' horizontal      '6' horizontal reversed
-          '8' vertical        '2' vertical reversed
-          '7' diagonal        '3' diagonal reversed
+      Check whether a word is at given location with given roatation
     */
 
     // Prepare word and direction
-    if (dirc == '6' || dirc == '2' || dirc == '3')
-      reverse(w.begin(), w.end());
-
     int dx = 0; int dy = 0;
-    if (dirc == '4' || dirc == '6' || dirc == '7' || dirc == '3')
-      dx = 1;
-    if (dirc == '8' || dirc == '2' || dirc == '7' || dirc == '3')
-      dy = 1;
+    getDxDy(dirc, dx, dy, r, w);
 
     // Check whether the move is legal
     for (unsigned int i = 0; i < w.size(); i++) {
@@ -107,22 +101,42 @@ public:
     return true;
   }
 
-  // Modifiers
-  bool setWord(int r, int c, string w, char dirc) {
+  void getDxDy(char dirc, int &dx, int &dy, int &r, string &w) const {
     /*
-    Check whether the word can be placed at given location with given roatation.
-    Place the word and return true if the move is legal. Retrun false otherwise.
+      Helper function for geting the value of dx, dy, w for given rotation
+
+
+      dirc: '4' horizontal        '6' horizontal reversed
+            '8' vertical          '2' vertical reversed
+            '7' diagonal          '3' diagonal reversed
+            '1' reversed diagonal '9' reversed diagonal reversed
     */
 
-    // Prepare word and direction
-    if (dirc == '6' || dirc == '2' || dirc == '3')
+    if (dirc == '6' || dirc == '2' || dirc == '3' || dirc == '9')
       reverse(w.begin(), w.end());
 
-    int dx = 0; int dy = 0;
-    if (dirc == '4' || dirc == '6' || dirc == '7' || dirc == '3')
+    if (dirc == '4' || dirc == '6' || dirc == '7' || dirc == '3' || dirc == '1'
+        || dirc == '9')
       dx = 1;
     if (dirc == '8' || dirc == '2' || dirc == '7' || dirc == '3')
       dy = 1;
+    else if (dirc == '1' || dirc == '9')
+      dy = -1;
+
+    if (dirc == '1' || dirc == '9')
+      r += w.size() - 1;
+  }
+
+  // Modifiers
+  bool setWord(int r, int c, string w, char dirc) {
+    /*
+      Check whether the word can be placed at given location with given roatation.
+      Place the word and return true if the move is legal. Retrun false otherwise.
+    */
+
+    // Prepare word and direction
+    int dx = 0; int dy = 0;
+    getDxDy(dirc, dx, dy, r, w);
 
     // Check whether the move is legal
     for (unsigned int i = 0; i < w.size(); i++) {
@@ -144,21 +158,18 @@ public:
     return true;
   }
 
-  void delWord(int r, int c, unsigned int len, char dirc) {
+  void delWord(int r, int c, string w, char dirc) {
     /*
-    Delete word at given location with given roatation
+      Delete word at given location with given roatation
     */
 
     // Prepare word and direction
     int dx = 0; int dy = 0;
-    if (dirc == '4' || dirc == '6' || dirc == '7' || dirc == '3')
-      dx = 1;
-    if (dirc == '8' || dirc == '2' || dirc == '7' || dirc == '3')
-      dy = 1;
+    getDxDy(dirc, dx, dy, r, w);
 
     // Delete word from the board
     int empty_add = 0;
-    for (unsigned int i = 0; i < len; i++) {
+    for (unsigned int i = 0; i < w.size(); i++) {
       // Count the number of slots that get emptied
       dup[r+i*dy][c+i*dx] -= 1;
       if (dup[r+i*dy][c+i*dx] == 0) {

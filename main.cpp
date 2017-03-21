@@ -96,6 +96,16 @@ int main(int argc, char *argv[]) {
 	Board b = Board(row, col);
   vector<Board> ans = vector<Board>();
 
+#if 0
+  b.setWord(0, 0, "dira", '4');
+  b.setWord(1, 0, "arts", '4');
+
+  b.Print();
+  cout << b.checkWord(0, 2, "at", '9') << endl;
+
+#endif
+
+#if 1
   // Start recursion
   wordSearch(b, ans, words, no_words, all_solutions);
 
@@ -107,17 +117,18 @@ int main(int argc, char *argv[]) {
   for (unsigned int i = 0; i < ans.size(); i++) {
     ans[i].Print();
   }
+#endif
 
 	return 0;
 }
 
 void wordSearch(Board b, vector<Board> &ans, const vector<string> &words,
                 const vector<string> &no_words, const bool &all_solutions) {
-  // Place the first word
-  int row_lim = b.numRows() - words[0].size();
-  int col_lim = b.numColumns() - words[0].size();
+  // Place the first word at upper left corner
+  int row_lim = (b.numRows() - words[0].size()) / 2;
+  int col_lim = (b.numColumns() - words[0].size()) / 2;
   // Place horizontally
-  for (unsigned int i = 0; i < b.numRows(); i++) {
+  for (unsigned int i = 0; i < ceil(b.numRows() / 2.); i++) {
     for (int j = 0; j <= col_lim; j++) {
       word_recur(b, ans, words, no_words, all_solutions, i, j, '4', 0);
       word_recur(b, ans, words, no_words, all_solutions, i, j, '6', 0);
@@ -125,7 +136,7 @@ void wordSearch(Board b, vector<Board> &ans, const vector<string> &words,
   }
   // Place vertically
   for (int i = 0; i <= row_lim; i++) {
-    for (unsigned int j = 0; j < b.numColumns(); j++) {
+    for (unsigned int j = 0; j < ceil(b.numColumns() / 2.); j++) {
       word_recur(b, ans, words, no_words, all_solutions, i, j, '8', 0);
       word_recur(b, ans, words, no_words, all_solutions, i, j, '2', 0);
     }
@@ -135,6 +146,8 @@ void wordSearch(Board b, vector<Board> &ans, const vector<string> &words,
     for (int j = 0; j <= col_lim; j++) {
       word_recur(b, ans, words, no_words, all_solutions, i, j, '7', 0);
       word_recur(b, ans, words, no_words, all_solutions, i, j, '3', 0);
+      word_recur(b, ans, words, no_words, all_solutions, i, j, '1', 0);
+      word_recur(b, ans, words, no_words, all_solutions, i, j, '9', 0);
     }
   }
 }
@@ -180,6 +193,8 @@ void word_recur(Board b, vector<Board> &ans, const vector<string> &words,
       for (int j = 0; j <= col_lim; j++) {
         word_recur(b, ans, words, no_words, all_solutions, i, j, '7', indx);
         word_recur(b, ans, words, no_words, all_solutions, i, j, '3', indx);
+        word_recur(b, ans, words, no_words, all_solutions, i, j, '1', indx);
+        word_recur(b, ans, words, no_words, all_solutions, i, j, '9', indx);
       }
     }
   }
