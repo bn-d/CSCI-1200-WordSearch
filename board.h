@@ -101,32 +101,6 @@ public:
     return true;
   }
 
-  void getDxDy(char dirc, int &dx, int &dy, int &r, string &w) const {
-    /*
-      Helper function for geting the value of dx, dy, w for given rotation
-
-
-      dirc: '4' horizontal        '6' horizontal reversed
-            '8' vertical          '2' vertical reversed
-            '7' diagonal          '3' diagonal reversed
-            '1' reversed diagonal '9' reversed diagonal reversed
-    */
-
-    if (dirc == '6' || dirc == '2' || dirc == '3' || dirc == '9')
-      reverse(w.begin(), w.end());
-
-    if (dirc == '4' || dirc == '6' || dirc == '7' || dirc == '3' || dirc == '1'
-        || dirc == '9')
-      dx = 1;
-    if (dirc == '8' || dirc == '2' || dirc == '7' || dirc == '3')
-      dy = 1;
-    else if (dirc == '1' || dirc == '9')
-      dy = -1;
-
-    if (dirc == '1' || dirc == '9')
-      r += w.size() - 1;
-  }
-
   // Modifiers
   bool setWord(int r, int c, string w, char dirc) {
     /*
@@ -180,21 +154,56 @@ public:
     empty += empty_add;
   }
 
-  // Printer
-  void Print() const {
-    cout << "Board:" << endl;
+  // toString
+  string toString(bool hori_filp=false, bool vert_flip=false) const {
+    string ans = "";
+    ans += "Board:\n";
     for (unsigned int i = 0; i < this->numRows(); i++) {
-      cout << "  ";
+      ans += "  ";
       for (unsigned int j = 0; j < this->numColumns(); j++)
-        cout << board[i][j];
-      cout << endl;
+        if (!hori_filp && !vert_flip)
+          ans += board[i][j];
+        else if (hori_filp && !vert_flip)
+          ans += board[i][this->numColumns()-1-j];
+        else if (!hori_filp && vert_flip)
+          ans += board[this->numRows()-1-i][j];
+        else
+          ans += board[this->numRows()-1-i][this->numColumns()-1-j];
+      ans += "\n";
     }
+    return ans;
   }
 
 private:
   vector<vector<char> > board;
   vector<vector<int> > dup;
   int empty;
+
+  void getDxDy(char dirc, int &dx, int &dy, int &r, string &w) const {
+    /*
+      Helper function for geting the value of dx, dy, w for given rotation
+
+
+      dirc: '4' horizontal        '6' horizontal reversed
+            '8' vertical          '2' vertical reversed
+            '7' diagonal          '3' diagonal reversed
+            '1' reversed diagonal '9' reversed diagonal reversed
+    */
+
+    if (dirc == '6' || dirc == '2' || dirc == '3' || dirc == '9')
+      reverse(w.begin(), w.end());
+
+    if (dirc == '4' || dirc == '6' || dirc == '7' || dirc == '3' || dirc == '1'
+        || dirc == '9')
+      dx = 1;
+    if (dirc == '8' || dirc == '2' || dirc == '7' || dirc == '3')
+      dy = 1;
+    else if (dirc == '1' || dirc == '9')
+      dy = -1;
+
+    if (dirc == '1' || dirc == '9')
+      r += w.size() - 1;
+  }
 
 };
 

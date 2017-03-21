@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <math.h>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -109,14 +110,25 @@ int main(int argc, char *argv[]) {
   // Start recursion
   wordSearch(b, ans, words, no_words, all_solutions);
 
+  // Find variant solutions for unique solutions
+  set<string> ans_set = set<string>();
+  for (unsigned int i = 0; i < ans.size(); i++) {
+    ans_set.insert(ans[i].toString());
+    ans_set.insert(ans[i].toString(true, false));
+    ans_set.insert(ans[i].toString(false, true));
+    ans_set.insert(ans[i].toString(true, true));
+  }
+
   // Print solution(s)
-  if (ans.size() == 0)
+  if (ans_set.size() == 0)
     cout << "No solution" << endl;
   else
-    cout << ans.size() << " solution(s)" << endl;
+    cout << ans_set.size() << " solution(s)" << endl;
+# if 0
   for (unsigned int i = 0; i < ans.size(); i++) {
-    ans[i].Print();
+    ans[i].toString();
   }
+#endif
 #endif
 
 	return 0;
@@ -162,7 +174,7 @@ void word_recur(Board b, vector<Board> &ans, const vector<string> &words,
       if (b.checkFilled()) {
         // Stop searching after one solution
         if (!all_solutions) {
-          b.Print();
+          cout << b.toString();
           exit(0);
         }
         // Add to answer list for all solution
