@@ -116,16 +116,15 @@ int main(int argc, char *argv[]) {
     ans_set.insert(ans[i].toString(true, true));
   }
 
-  // Print solution(s)
-  if (ans_set.size() == 0)
-    cout << "No solution" << endl;
-  else
-    cout << ans_set.size() << " solution(s)" << endl;
-# if 0
   for (set<string>::iterator it=ans_set.begin(); it != ans_set.end(); it++) {
     cout << *it;
   }
-#endif
+
+  // Print solution(s)
+  if (ans_set.size() == 0)
+    cout << endl << "No solution" << endl;
+  else
+    cout << endl << "Found " << ans_set.size() << " solution(s)" << endl;
 
 	return 0;
 }
